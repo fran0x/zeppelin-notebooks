@@ -1,0 +1,159 @@
+{
+  "paragraphs": [
+    {
+      "title": "Create Leaflet Map via Angular",
+      "text": "%angular\n\u003clink rel\u003d\"stylesheet\" href\u003d\"https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.css\" /\u003e\n\u003cdiv id\u003d\"map\" style\u003d\"height: 800px; width: 100%\"\u003e\u003c/div\u003e\n\n\u003cscript type\u003d\"text/javascript\"\u003e\nfunction initMap() {\n    var map \u003d L.map(\u0027map\u0027).setView([30.00, -30.00], 3);\n\n    L.tileLayer(\u0027http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png\u0027, {\n        attribution: \u0027Map data \u0026copy; \u003ca href\u003d\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e contributors\u0027,\n        maxZoom: 12,\n        minZoom: 3\n    }).addTo(map);\n\n    var el \u003d angular.element($(\u0027#map\u0027).parent(\u0027.ng-scope\u0027));\n    angular.element(el).ready(function() {\n        window.locationWatcher \u003d el.scope().compiledScope.$watch(\u0027data\u0027, function(newValue, oldValue) {\n            angular.forEach(newValue, function(tweet) {\n                L.marker([tweet.lat, tweet.lon]).bindPopup(\"\u003cb\u003e\" + tweet.user + \"\u003c/b\u003e\u003cbr\u003e\" + tweet.tweet).addTo(map);             \n            });\n        })\n    });\n}\n\nif (window.locationWatcher) { window.locationWatcher(); }\n\nif (window.L) { initMap(); }\nelse {\n    var sc \u003d document.createElement(\u0027script\u0027);\n    sc.type \u003d \u0027text/javascript\u0027;\n    sc.src \u003d \u0027https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.js\u0027;\n    sc.onload \u003d initMap;\n    sc.onerror \u003d function(err) { alert(err); }\n    document.getElementsByTagName(\u0027head\u0027)[0].appendChild(sc);\n}\n\u003c/script\u003e\n",
+      "dateUpdated": "Nov 16, 2016 1:38:57 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479302523262_-1167770764",
+      "id": "20161116-132203_299568547",
+      "dateCreated": "Nov 16, 2016 1:22:03 AM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Import Spark Streaming libraries",
+      "text": "import org.apache.spark.streaming._\nimport org.apache.spark.streaming.twitter._",
+      "dateUpdated": "Nov 16, 2016 1:38:42 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479302660069_-1247597677",
+      "id": "20161116-132420_904883552",
+      "dateCreated": "Nov 16, 2016 1:24:20 AM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Configure Twitter OAuth credentials",
+      "text": "System.setProperty(\"twitter4j.oauth.consumerKey\", \"\")\nSystem.setProperty(\"twitter4j.oauth.consumerSecret\", \"\")\nSystem.setProperty(\"twitter4j.oauth.accessToken\", \"\")\nSystem.setProperty(\"twitter4j.oauth.accessTokenSecret\", \"\")",
+      "dateUpdated": "Nov 16, 2016 2:35:12 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479302996459_496923356",
+      "id": "20161116-132956_702631610",
+      "dateCreated": "Nov 16, 2016 1:29:56 AM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Start (Spark) streaming of (Twitter) tweets",
+      "text": "case class Tweet(user: String, tweet: String, lat: Double, lon: Double)\n\nval ssc \u003d new StreamingContext(sc, Seconds(2))\n\nval tweets \u003d TwitterUtils.createStream(ssc, None).window(Seconds(10))\ntweets.foreachRDD(rdd \u003d\u003e {\n    val df \u003d rdd\n      .filter(_.getGeoLocation !\u003d null)\n      .map(t \u003d\u003e Tweet(t.getUser.getName, t.getText, t.getGeoLocation.getLatitude, t.getGeoLocation.getLongitude))\n          \n    var items \u003d df.collect\n    z.angularBind(\"data\", items) \n})\n\nssc.start()\n",
+      "dateUpdated": "Nov 16, 2016 1:38:21 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479303353895_-2135622208",
+      "id": "20161116-133553_241079618",
+      "dateCreated": "Nov 16, 2016 1:35:53 AM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "",
+      "text": "",
+      "dateUpdated": "Nov 16, 2016 1:33:05 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479303167601_1298217397",
+      "id": "20161116-133247_1069488570",
+      "dateCreated": "Nov 16, 2016 1:32:47 AM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Twitter Streaming",
+  "id": "2C3DZJWAT",
+  "angularObjects": {
+  },
+  "config": {},
+  "info": {}
+}
