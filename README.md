@@ -11,11 +11,12 @@ Web-based notebooks created with [Apache Zeppelin](https://zeppelin.apache.org/)
 4. Go to Zeppelin: `open http://localhost:8080`
 5. Stop Zeppelin daemon: `./usr/local/Cellar/apache-zeppelin/0.6.2/bin/zeppelin-daemon.sh stop`
 
-> For simplicity add aliases to your bash profile, for instance the following:
-> `alias zep="/usr/local/Cellar/apache-zeppelin/0.6.2/bin/zeppelin-daemon.sh start && open http://localhost:8080"`
-> `alias zepx="/usr/local/Cellar/apache-zeppelin/0.6.2/bin/zeppelin-daemon.sh stop"`
-> `alias zepl="tail -f /usr/local/Cellar/apache-zeppelin/0.6.2/libexec/logs/zeppelin-interpreter-spark-username-hostname.log"`
-> *Note: update 'username' and 'hostname' according to your system*
+For simplicity add aliases to your bash profile, for instance the following:
+- `alias zep="/usr/local/Cellar/apache-zeppelin/0.6.2/bin/zeppelin-daemon.sh start && open http://localhost:8080"`
+- `alias zepx="/usr/local/Cellar/apache-zeppelin/0.6.2/bin/zeppelin-daemon.sh stop"`
+- `alias zepl="tail -f /usr/local/Cellar/apache-zeppelin/0.6.2/libexec/logs/zeppelin-interpreter-spark-username-hostname.log"`
+
+*Note: update 'username' and 'hostname' according to your system*
 
 
 
