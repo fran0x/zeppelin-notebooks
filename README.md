@@ -21,7 +21,7 @@ Additional information about the notebooks here available:
 | Description	| Components | Code	| View |
 | ------------- | ----- | ---------- 	| ------------  | --------  | --------  |
 | Account Analysis | Spark | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C17HCPG9/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvOTkwMDU5MzNjYWZlNGVlMWJmZjk3MmYxYjNlMGVkMzEvbm90ZS5qc29u) |
-| Twitter Streaming | Twitter/Spark Streaming/Angular/Leaflet | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C3DZJWAT/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvNzk5MzRjM2Q5NDFhNDhkYzlhMDQ2NWM2ZjlhNzIzY2Yvbm90ZS5qc29u) |
+| Twitter Streaming | Twitter / Spark Streaming / Angular / Leaflet | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C3DZJWAT/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvNzk5MzRjM2Q5NDFhNDhkYzlhMDQ2NWM2ZjlhNzIzY2Yvbm90ZS5qc29u) |
 
 ## Getting Started with Zeppelin
 
