@@ -4,14 +4,18 @@ Web-based notebooks created with [Apache Zeppelin](https://zeppelin.apache.org/)
 - Exploratory Analysis
 - Fast Prototyping
 
-The main programming language used for these notebooks is Scala (Spark) however others as Angular have been used as well. 
+More information about the notebooks:
+- Their main programming language is Scala / Spark (however other languages as Angular have been used as well)
+- They can be visualized online by means of [ZeppelinHub](https://www.zeppelinhub.com) (see column *View* below)
+- They require some libraries to be imported in the corresponding Interpreters (TODO: add new column for that)
 
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 
 ## Notebooks
 
-| Description	| Components | Code	| View ([ZeppelinHub](https://www.zeppelinhub.com))	|
+| Description	| Components | Code	| View |
 | ------------- | ----- | ---------- 	| ------------  | --------  | --------  |
+| Account Analysis | Spark | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C17HCPG9/note.json) } [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvOTkwMDU5MzNjYWZlNGVlMWJmZjk3MmYxYjNlMGVkMzEvbm90ZS5qc29u)
 | Twitter Streaming | Twitter/Spark Streaming/Angular/Leaflet | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C3DZJWAT/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvNzk5MzRjM2Q5NDFhNDhkYzlhMDQ2NWM2ZjlhNzIzY2Yvbm90ZS5qc29u) | NFLabs | Default notebook installed by Zeppelin |
 
 ## Getting Started with Zeppelin
