@@ -1,0 +1,760 @@
+{
+  "paragraphs": [
+    {
+      "title": "Libraries and utilities",
+      "text": "import org.apache.spark.sql.Column\nimport org.apache.spark.sql.functions.udf\n\ndef ToDateMDY(c: Column) \u003d to_date(from_unixtime(unix_timestamp(c, \"MM/dd/yy\")))\ndef ToDateDMY(c: Column) \u003d to_date(from_unixtime(unix_timestamp(c, \"dd/MM/yy\")))",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 14, 2016 9:39:28 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479121041364_26790602",
+      "id": "20161114-115721_512770692",
+      "dateCreated": "Nov 14, 2016 11:57:21 AM",
+      "dateStarted": "Nov 14, 2016 9:39:28 AM",
+      "dateFinished": "Nov 14, 2016 9:39:29 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Load Bank1 data",
+      "text": "val bank1CSV \u003d \"\"\nval bank1DumpDF \u003d sqlContext.read\n    .format(\"com.databricks.spark.csv\")\n    .option(\"header\", \"true\").option(\"inferSchema\", \"true\")\n    .load(bank1CSV))\nbank1DumpDF.printSchema()\nbank1DumpDF.count()\nbank1DumpDF.registerTempTable(\"bank1Dump\")",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 4:46:09 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1478629307800_-1330710483",
+      "id": "20161108-182147_1023084203",
+      "dateCreated": "Nov 8, 2016 6:21:47 AM",
+      "dateStarted": "Nov 14, 2016 9:39:31 AM",
+      "dateFinished": "Nov 14, 2016 9:39:33 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Aggregate Bank1 (daily, monthly, balance)",
+      "text": "val bank1DF \u003d bank1DumpDF.select(ToDateMDY($\"Date\").alias(\"Date\"), $\"Item\", $\"Amount\", $\"Balance\").sort(asc(\"Date\"))\nbank1DF.registerTempTable(\"bank1\")\n\nval bank1DailyDF \u003d bank1DF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbank1DailyDF.registerTempTable(\"bank1Daily\")\n\nval bank1MonthlyDF \u003d bank1DailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbank1MonthlyDF.registerTempTable(\"bank1Monthly\")\n\nval bank1BalanceDF \u003d bank1DF.dropDuplicates(Array(\"Date\"))\nbank1BalanceDF.registerTempTable(\"bank1Balance\")",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:04:26 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1478629532974_-1609904079",
+      "id": "20161108-182532_543791415",
+      "dateCreated": "Nov 8, 2016 6:25:32 AM",
+      "dateStarted": "Nov 14, 2016 10:12:19 AM",
+      "dateFinished": "Nov 14, 2016 10:12:23 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Daily Bank1",
+      "text": "%sql\nselect Day, Total from bank1Daily where to_date(Day) \u003e \u00272016-06-31\u0027",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 14, 2016 9:39:40 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "stackedAreaChart",
+          "height": 258.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Day",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Day",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          },
+          "lineWithFocus": false,
+          "forceY": false
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1478635610861_1163825644",
+      "id": "20161108-200650_2001174444",
+      "dateCreated": "Nov 8, 2016 8:06:50 AM",
+      "dateStarted": "Nov 14, 2016 9:39:41 AM",
+      "dateFinished": "Nov 14, 2016 9:39:41 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Monthly Bank1",
+      "text": "%sql\nselect Month, Total from bank1Monthly where Month \u003e 6",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 14, 2016 9:15:07 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Month",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Month",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1478643488080_1158180449",
+      "id": "20161108-221808_203759619",
+      "dateCreated": "Nov 8, 2016 10:18:08 AM",
+      "dateStarted": "Nov 14, 2016 9:14:08 AM",
+      "dateFinished": "Nov 14, 2016 9:14:11 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Balance Bank1",
+      "text": "%sql\nselect Date, Balance from bank1Balance where to_date(Date) \u003e \u00272016-06-31\u0027",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 14, 2016 10:12:37 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "stackedAreaChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Balance",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Balance",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1478644415716_-597866605",
+      "id": "20161108-223335_835073599",
+      "dateCreated": "Nov 8, 2016 10:33:35 AM",
+      "dateStarted": "Nov 14, 2016 10:12:31 AM",
+      "dateFinished": "Nov 14, 2016 10:12:31 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Load Sabadell data",
+      "text": "val bank2CSV \u003d \"\"\nval bank2DumpDF \u003d sqlContext.read\n    .format(\"com.databricks.spark.csv\")\n    .option(\"header\", \"true\").option(\"inferSchema\", \"true\")\n    .load(bank2CSV)\nbank2DumpDF.printSchema()\nbank2DumpDF.count()\nbank2DumpDF.registerTempTable(\"bank2Dump\")",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 4:46:09 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1478645160238_1920756058",
+      "id": "20161108-224600_1373727389",
+      "dateCreated": "Nov 8, 2016 10:46:00 AM",
+      "dateStarted": "Nov 14, 2016 9:44:26 AM",
+      "dateFinished": "Nov 14, 2016 9:44:28 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Aggregate Sabadell (daily, monthly, balance)",
+      "text": "val bank2DF \u003d bank2DumpDF.select(ToDateDMY($\"Date\").alias(\"Date\"), $\"Item\", $\"Amount\", $\"Balance\").sort(asc(\"Date\"))\nbank2DF.registerTempTable(\"bank2\")\n\nval bank2DailyDF \u003d bank2DF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbank2DailyDF.registerTempTable(\"bank2Daily\")\n\nval bank2MonthlyDF \u003d bank2DailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbank2MonthlyDF.registerTempTable(\"bank2Monthly\")\n\nval bank2BalanceDF \u003d bank2DF.dropDuplicates(Array(\"Date\"))\nbank2BalanceDF.registerTempTable(\"bank2Balance\")",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:04:51 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479158188584_551983994",
+      "id": "20161114-211628_1466443087",
+      "dateCreated": "Nov 14, 2016 9:16:28 AM",
+      "dateStarted": "Nov 14, 2016 10:11:12 AM",
+      "dateFinished": "Nov 14, 2016 10:11:15 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Sabadell Daily",
+      "text": "%sql\nselect Day, Total from bank2Daily where to_date(Day) \u003e \u00272016-06-31\u0027",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:05:24 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "stackedAreaChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Day",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Day",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479158869549_1654254011",
+      "id": "20161114-212749_986081447",
+      "dateCreated": "Nov 14, 2016 9:27:49 AM",
+      "dateStarted": "Nov 14, 2016 9:44:40 AM",
+      "dateFinished": "Nov 14, 2016 9:44:40 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Sabadell Monthly",
+      "text": "%sql\nselect Month, Total from bank2Monthly where Month \u003e 6",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:05:34 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Month",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Month",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479158913364_1042549233",
+      "id": "20161114-212833_523812216",
+      "dateCreated": "Nov 14, 2016 9:28:33 AM",
+      "dateStarted": "Nov 14, 2016 9:44:44 AM",
+      "dateFinished": "Nov 14, 2016 9:44:46 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Sabadell Balance",
+      "text": "%sql\nselect Date, Balance from bank2Balance where to_date(Date) \u003e \u00272016-06-31\u0027",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:05:43 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "stackedAreaChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Balance",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Balance",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479158910817_-1141670273",
+      "id": "20161114-212830_904789753",
+      "dateCreated": "Nov 14, 2016 9:28:30 AM",
+      "dateStarted": "Nov 14, 2016 10:11:22 AM",
+      "dateFinished": "Nov 14, 2016 10:11:22 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Join Bank1 and Sabadell (daily, monthly, balance)",
+      "text": "val bankDF \u003d bank1DF.unionAll(bank2DF)\nbankDF.registerTempTable(\"bank\")\n\nval bankDailyDF \u003d bankDF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbankDailyDF.registerTempTable(\"bankDaily\")\n\nval bankMonthlyDF \u003d bankDailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbankMonthlyDF.registerTempTable(\"bankMonthly\")\n\nval bankBalanceDF \u003d bank1BalanceDF.unionAll(bank2BalanceDF).groupBy($\"Date\").agg(sum($\"Balance\").alias(\"Balance\")).sort(asc(\"Date\"))\nbankBalanceDF.registerTempTable(\"bankBalance\")",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:05:14 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479159092022_1135890497",
+      "id": "20161114-213132_1069945287",
+      "dateCreated": "Nov 14, 2016 9:31:32 AM",
+      "dateStarted": "Nov 14, 2016 10:19:01 AM",
+      "dateFinished": "Nov 14, 2016 10:19:04 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Joined Daily",
+      "text": "%sql\nselect Day, Total from bankDaily where to_date(Day) \u003e \u00272016-06-31\u0027",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:05:58 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "stackedAreaChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Day",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Day",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479160249699_1164630649",
+      "id": "20161114-215049_2112884745",
+      "dateCreated": "Nov 14, 2016 9:50:49 AM",
+      "dateStarted": "Nov 14, 2016 9:53:09 AM",
+      "dateFinished": "Nov 14, 2016 9:53:11 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Joined Monthly",
+      "text": "%sql\nselect Month, Total from bankMonthly where Month \u003e 6",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:06:08 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Month",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Month",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Total",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479160297123_-1576259218",
+      "id": "20161114-215137_718072930",
+      "dateCreated": "Nov 14, 2016 9:51:37 AM",
+      "dateStarted": "Nov 14, 2016 9:53:29 AM",
+      "dateFinished": "Nov 14, 2016 9:53:34 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Joined Balance",
+      "text": "%sql\nselect Date, Balance from bankBalance where to_date(Date) \u003e \u00272016-06-31\u0027",
+      "user": "flopezlasanta",
+      "dateUpdated": "Nov 16, 2016 2:06:24 AM",
+      "config": {
+        "colWidth": 4.0,
+        "graph": {
+          "mode": "stackedAreaChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Balance",
+              "index": 1.0,
+              "aggr": "avg"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Date",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Balance",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/sql",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479160369481_-1329560197",
+      "id": "20161114-215249_1529720944",
+      "dateCreated": "Nov 14, 2016 9:52:49 AM",
+      "dateStarted": "Nov 14, 2016 10:19:21 AM",
+      "dateFinished": "Nov 14, 2016 10:19:24 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "// balance should fill gaps with previous value\n// daily should include days with zero movements",
+      "dateUpdated": "Nov 16, 2016 2:06:57 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479160435557_-2092224462",
+      "id": "20161114-215355_1634621248",
+      "dateCreated": "Nov 14, 2016 9:53:55 AM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Account Analysis",
+  "id": "2C17HCPG9",
+  "angularObjects": {
+    "2C3UTV28R:shared_process": [],
+    "2C21E796A:shared_process": [],
+    "2BZT2ZSCQ:shared_process": [],
+    "2C1T9MXGS:shared_process": [],
+    "2C2YSHTSS:shared_process": [],
+    "2BZEH22C8:shared_process": [],
+    "2BZ4XB5SH:shared_process": [],
+    "2C361FCMD:shared_process": [],
+    "2C1KZ7K63:shared_process": [],
+    "2C2JF5HA6:shared_process": [],
+    "2C1M8N29X:shared_process": [],
+    "2C16875ST:shared_process": [],
+    "2C1VYQHSF:shared_process": [],
+    "2C19E3KUX:shared_process": [],
+    "2C1EM8G81:shared_process": [],
+    "2C21NE7P8:shared_process": [],
+    "2C269K9N2:shared_process": [],
+    "2BZNT78YS:shared_process": []
+  },
+  "config": {
+    "looknfeel": "default"
+  },
+  "info": {}
+}
