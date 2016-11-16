@@ -1,9 +1,22 @@
 # Zeppelin Notebooks
-Web-based notebooks created with [Apache Zeppelin](https://zeppelin.apache.org/)
+
+Web-based notebooks created with [Apache Zeppelin](https://zeppelin.apache.org/) for:
+- Exploratory Analysis
+- Fast Prototyping
+
+The main programming language used for these notebooks is Scala (Spark) however others as Angular have been used as well. 
 
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 
-## Install Zeppelin (OS X)
+## Notebooks
+
+| Description	| Components | Code	| View ([ZeppelinHub](https://www.zeppelinhub.com))	|
+| ------------- | ----- | ---------- 	| ------------  | --------  | --------  |
+| Twitter Streaming | Twitter/Spark Streaming/Angular/Leaflet | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C3DZJWAT/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvNzk5MzRjM2Q5NDFhNDhkYzlhMDQ2NWM2ZjlhNzIzY2Yvbm90ZS5qc29u) | NFLabs | Default notebook installed by Zeppelin |
+
+## Getting Started with Zeppelin
+
+### Install Zeppelin (OS X)
 
 1. Edit `/etc/hosts` adding your hostname: `127.0.0.1 localhost <hostname>`
 2. Install Zeppelin: `brew install apache-zeppelin`
@@ -18,13 +31,13 @@ For simplicity add aliases to your bash profile, for instance the following:
 
 *Note: update 'username' and 'hostname' according to your system*
 
-## Configure Zeppelin
+### Configure Zeppelin
 
 - Enable GIT storage
 - Enable user authentication (Shiro)
 - Extend interpreters with additional libraries (Spark-Streaming-Twitter, jTDS...)
 
-## Configure Zeppelin Hub
+### Configure Zeppelin Hub
 
 - Create account in Zeppelin Hub
 - Download Zeppelin Hub library and include in Zeppelin installation
