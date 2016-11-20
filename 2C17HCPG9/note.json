@@ -1,10 +1,42 @@
 {
   "paragraphs": [
     {
+      "title": "Enter inputs",
+      "text": "// csv files including header\nval bank1CSV \u003d \"/Users/franciscolopez/devops/data/bank1.csv\"\nval bank2CSV \u003d \"/Users/franciscolopez/devops/data/bank2.csv\"\n\n// date formats for each bank\nval bank1DateFormat \u003d \"MM/dd/yy\"\nval bank2DateFormat \u003d \"dd/MM/yy\"\n\nval firstDay \u003d \"2016-06-30\" // only results after this day (non-inclusive) will be included at the end\nval lastDay \u003d \"2016-11-20\"  // only results before this day (inclusive) will be included at the end",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:11:03 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479639992670_1223700777",
+      "id": "20161120-110632_1545313809",
+      "dateCreated": "Nov 20, 2016 11:06:32 AM",
+      "dateStarted": "Nov 20, 2016 3:11:03 PM",
+      "dateFinished": "Nov 20, 2016 3:12:06 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
       "title": "Libraries and utilities",
-      "text": "import org.apache.spark.sql.Column\nimport org.apache.spark.sql.functions.udf\n\ndef ToDateMDY(c: Column) \u003d to_date(from_unixtime(unix_timestamp(c, \"MM/dd/yy\")))\ndef ToDateDMY(c: Column) \u003d to_date(from_unixtime(unix_timestamp(c, \"dd/MM/yy\")))",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 14, 2016 9:39:28 AM",
+      "text": "// add Spark UDF functions\nimport org.apache.spark.sql.Column\nimport org.apache.spark.sql.functions.udf\n\n// add nscala-time (Joda wrapper for Scala) imports (requires to include the library into Spark interpreter previously)\nimport com.github.nscala_time.time.Imports._\nimport org.joda.time.Days\n\nimport java.sql.Date\n\n// utilities to convert date strings with a certain format into date objects (requires UDF functions for that)\ndef toDateBank1(c: Column) \u003d to_date(from_unixtime(unix_timestamp(c, bank1DateFormat)))\ndef toDateBank2(c: Column) \u003d to_date(from_unixtime(unix_timestamp(c, bank2DateFormat)))\ndef toDate(date: java.util.Date) \u003d new java.sql.Date(date.getTime)\n\n// downside of spark-csv is thatcreates a DF with schema BUT cannot auto detect the field data types: hence let\u0027s create some UDFs\nval toInt    \u003d udf[Int, String]( _.toInt)\nval toDouble \u003d udf[Double, String]( _.toDouble)\nval toFloat  \u003d udf[Float, String](_.toFloat)",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:12:52 PM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -27,17 +59,48 @@
       "jobName": "paragraph_1479121041364_26790602",
       "id": "20161114-115721_512770692",
       "dateCreated": "Nov 14, 2016 11:57:21 AM",
-      "dateStarted": "Nov 14, 2016 9:39:28 AM",
-      "dateFinished": "Nov 14, 2016 9:39:29 AM",
+      "dateStarted": "Nov 20, 2016 3:12:52 PM",
+      "dateFinished": "Nov 20, 2016 3:13:04 PM",
       "status": "FINISHED",
-      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Create DF for filling gaps (days without balance)",
+      "text": "// date range\nval start \u003d new LocalDate(firstDay)\nval end \u003d new LocalDate(lastDay)\nval days \u003d Days.daysBetween(start, end).getDays\n\n// create days for whole interval, each day with 0 balance\nval year \u003d for (x \u003c- 1 to days) yield (toDate((start + x.days).toDate), 0.0) \nval yearDF \u003d sc.parallelize(year).toDF(\"Date\", \"Balance\").filter($\"Date\" \u003e firstDay)\n\ncase class Balance(date: java.sql.Date, balance: Double)\n\n// this function will be used later to update days in which there is no balance with the previous non-zero balance available (TODO: use scalaz ternary)\ndef carryon(days: Array[Balance]) \u003d {\n    // result\n    val r \u003d Array[Balance]()\n    // accumulator / carry over\n    val acc \u003d 0.0\n    // for each element if balance is zero: update balance with accumulator then add modified; otherwise: add as is, update accumulator with balance\n    days.foldLeft((r, acc)) { case ((r, acc), x) \u003d\u003e if (x.balance \u003d\u003d 0.0) (r :+ Balance(x.date, acc), acc) else (r :+ x, x.balance) }._1\n}",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:13:27 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479581036307_-431262731",
+      "id": "20161119-184356_1233036042",
+      "dateCreated": "Nov 19, 2016 6:43:56 AM",
+      "dateStarted": "Nov 20, 2016 3:13:27 PM",
+      "dateFinished": "Nov 20, 2016 3:14:02 PM",
+      "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Load Bank1 data",
-      "text": "val bank1CSV \u003d \"\"\nval bank1DumpDF \u003d sqlContext.read\n    .format(\"com.databricks.spark.csv\")\n    .option(\"header\", \"true\").option(\"inferSchema\", \"true\")\n    .load(bank1CSV))\nbank1DumpDF.printSchema()\nbank1DumpDF.count()\nbank1DumpDF.registerTempTable(\"bank1Dump\")",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 4:46:09 AM",
+      "text": "val bank1DumpDF \u003d sqlContext.read\n    .format(\"com.databricks.spark.csv\")\n    .option(\"header\", \"true\").option(\"inferSchema\", \"true\")\n    .load(bank1CSV)\n//bank1DumpDF.printSchema()\nbank1DumpDF.count()\nbank1DumpDF.createOrReplaceTempView(\"bank1Dump\")",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:14:06 PM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -60,17 +123,16 @@
       "jobName": "paragraph_1478629307800_-1330710483",
       "id": "20161108-182147_1023084203",
       "dateCreated": "Nov 8, 2016 6:21:47 AM",
-      "dateStarted": "Nov 14, 2016 9:39:31 AM",
-      "dateFinished": "Nov 14, 2016 9:39:33 AM",
+      "dateStarted": "Nov 20, 2016 3:14:06 PM",
+      "dateFinished": "Nov 20, 2016 3:14:17 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Aggregate Bank1 (daily, monthly, balance)",
-      "text": "val bank1DF \u003d bank1DumpDF.select(ToDateMDY($\"Date\").alias(\"Date\"), $\"Item\", $\"Amount\", $\"Balance\").sort(asc(\"Date\"))\nbank1DF.registerTempTable(\"bank1\")\n\nval bank1DailyDF \u003d bank1DF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbank1DailyDF.registerTempTable(\"bank1Daily\")\n\nval bank1MonthlyDF \u003d bank1DailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbank1MonthlyDF.registerTempTable(\"bank1Monthly\")\n\nval bank1BalanceDF \u003d bank1DF.dropDuplicates(Array(\"Date\"))\nbank1BalanceDF.registerTempTable(\"bank1Balance\")",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:04:26 AM",
+      "title": "Aggregate Bank1 (daily, monthly)",
+      "text": "val bank1DF \u003d bank1DumpDF.select(toDateBank1($\"Date\").alias(\"Date\"), $\"Item\", $\"Amount\", $\"Balance\").filter($\"Date\" \u003e firstDay).sort(asc(\"Date\"))\n//bank1DF.createOrReplaceTempView(\"bank1\")\n\nval bank1DailyDF \u003d bank1DF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbank1DailyDF.createOrReplaceTempView(\"bank1Daily\")\n\nval bank1MonthlyDF \u003d bank1DailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbank1MonthlyDF.createOrReplaceTempView(\"bank1Monthly\")",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:14:46 PM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -93,17 +155,48 @@
       "jobName": "paragraph_1478629532974_-1609904079",
       "id": "20161108-182532_543791415",
       "dateCreated": "Nov 8, 2016 6:25:32 AM",
-      "dateStarted": "Nov 14, 2016 10:12:19 AM",
-      "dateFinished": "Nov 14, 2016 10:12:23 AM",
+      "dateStarted": "Nov 20, 2016 3:14:46 PM",
+      "dateFinished": "Nov 20, 2016 3:14:53 PM",
       "status": "FINISHED",
-      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Balance Bank1",
+      "text": "// this is a bit more tricky (note: pretty sure there are better ways to solve it!)\nval originalBank1BalanceDF \u003d bank1DF\n    .select($\"Date\", $\"Balance\").dropDuplicates(Array(\"Date\"))  // take just date and balance, if several balances for a day take last one only\n    .unionAll(yearDF)                                           // union with year of days without balance\n    .groupBy($\"Date\").agg(sum($\"Balance\").alias(\"Balance\"))     // group by day and sum balances\n    .sort(asc(\"Date\"))\n\n// now let\u0027s fill the gaps: it would be great to do this in Spark directly (this piece of code is \"no bueno\")\nval originalBank1Balance \u003d originalBank1BalanceDF.collect.map { case row \u003d\u003e Balance(row.getDate(0), row.getDouble(1)) } // with gaps\nval bank1Balance \u003d carryon(originalBank1Balance) // without gaps\n\nval bank1BalanceDF \u003d sc.parallelize(bank1Balance).toDF(\"Date\", \"Balance\")\nbank1BalanceDF.createOrReplaceTempView(\"bank1Balance\")",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:15:00 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479635732117_-776892215",
+      "id": "20161120-095532_1981688428",
+      "dateCreated": "Nov 20, 2016 9:55:32 AM",
+      "dateStarted": "Nov 20, 2016 3:15:00 PM",
+      "dateFinished": "Nov 20, 2016 3:15:35 PM",
+      "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Daily Bank1",
-      "text": "%sql\nselect Day, Total from bank1Daily where to_date(Day) \u003e \u00272016-06-31\u0027",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 14, 2016 9:39:40 AM",
+      "text": "%sql\nselect Day, Total from bank1Daily",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:15:43 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -151,17 +244,16 @@
       "jobName": "paragraph_1478635610861_1163825644",
       "id": "20161108-200650_2001174444",
       "dateCreated": "Nov 8, 2016 8:06:50 AM",
-      "dateStarted": "Nov 14, 2016 9:39:41 AM",
-      "dateFinished": "Nov 14, 2016 9:39:41 AM",
+      "dateStarted": "Nov 20, 2016 3:15:43 PM",
+      "dateFinished": "Nov 20, 2016 3:15:46 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Monthly Bank1",
-      "text": "%sql\nselect Month, Total from bank1Monthly where Month \u003e 6",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 14, 2016 9:15:07 AM",
+      "text": "%sql\nselect Month, Total from bank1Monthly",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:16:02 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -197,7 +289,8 @@
           }
         },
         "enabled": true,
-        "title": true
+        "title": true,
+        "editorMode": "ace/mode/sql"
       },
       "settings": {
         "params": {},
@@ -206,17 +299,16 @@
       "jobName": "paragraph_1478643488080_1158180449",
       "id": "20161108-221808_203759619",
       "dateCreated": "Nov 8, 2016 10:18:08 AM",
-      "dateStarted": "Nov 14, 2016 9:14:08 AM",
-      "dateFinished": "Nov 14, 2016 9:14:11 AM",
+      "dateStarted": "Nov 20, 2016 3:16:02 PM",
+      "dateFinished": "Nov 20, 2016 3:16:10 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Balance Bank1",
-      "text": "%sql\nselect Date, Balance from bank1Balance where to_date(Date) \u003e \u00272016-06-31\u0027",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 14, 2016 10:12:37 AM",
+      "text": "%sql\nselect Date, Balance from bank1Balance",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:16:19 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -252,7 +344,8 @@
           }
         },
         "enabled": true,
-        "title": true
+        "title": true,
+        "editorMode": "ace/mode/sql"
       },
       "settings": {
         "params": {},
@@ -261,17 +354,16 @@
       "jobName": "paragraph_1478644415716_-597866605",
       "id": "20161108-223335_835073599",
       "dateCreated": "Nov 8, 2016 10:33:35 AM",
-      "dateStarted": "Nov 14, 2016 10:12:31 AM",
-      "dateFinished": "Nov 14, 2016 10:12:31 AM",
+      "dateStarted": "Nov 20, 2016 3:16:19 PM",
+      "dateFinished": "Nov 20, 2016 3:16:19 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Load Sabadell data",
-      "text": "val bank2CSV \u003d \"\"\nval bank2DumpDF \u003d sqlContext.read\n    .format(\"com.databricks.spark.csv\")\n    .option(\"header\", \"true\").option(\"inferSchema\", \"true\")\n    .load(bank2CSV)\nbank2DumpDF.printSchema()\nbank2DumpDF.count()\nbank2DumpDF.registerTempTable(\"bank2Dump\")",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 4:46:09 AM",
+      "title": "Load Bank2 data",
+      "text": "val bank2DumpDF \u003d sqlContext.read\n    .format(\"com.databricks.spark.csv\")\n    .option(\"header\", \"true\").option(\"inferSchema\", \"true\")\n    .load(bank2CSV)\n//bank2DumpDF.printSchema()\nbank2DumpDF.count()\nbank2DumpDF.createOrReplaceTempView(\"bank2Dump\")",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:16:30 PM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -294,17 +386,16 @@
       "jobName": "paragraph_1478645160238_1920756058",
       "id": "20161108-224600_1373727389",
       "dateCreated": "Nov 8, 2016 10:46:00 AM",
-      "dateStarted": "Nov 14, 2016 9:44:26 AM",
-      "dateFinished": "Nov 14, 2016 9:44:28 AM",
+      "dateStarted": "Nov 20, 2016 3:16:30 PM",
+      "dateFinished": "Nov 20, 2016 3:16:31 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Aggregate Sabadell (daily, monthly, balance)",
-      "text": "val bank2DF \u003d bank2DumpDF.select(ToDateDMY($\"Date\").alias(\"Date\"), $\"Item\", $\"Amount\", $\"Balance\").sort(asc(\"Date\"))\nbank2DF.registerTempTable(\"bank2\")\n\nval bank2DailyDF \u003d bank2DF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbank2DailyDF.registerTempTable(\"bank2Daily\")\n\nval bank2MonthlyDF \u003d bank2DailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbank2MonthlyDF.registerTempTable(\"bank2Monthly\")\n\nval bank2BalanceDF \u003d bank2DF.dropDuplicates(Array(\"Date\"))\nbank2BalanceDF.registerTempTable(\"bank2Balance\")",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:04:51 AM",
+      "title": "Aggregate Bank2 (daily, monthly)",
+      "text": "val bank2DF \u003d bank2DumpDF.select(toDateBank2($\"Date\").alias(\"Date\"), $\"Item\", $\"Amount\", $\"Balance\").sort(asc(\"Date\"))\n//bank2DF.createOrReplaceTempView(\"bank2\")\n\nval bank2DailyDF \u003d bank2DF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbank2DailyDF.createOrReplaceTempView(\"bank2Daily\")\n\nval bank2MonthlyDF \u003d bank2DailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbank2MonthlyDF.createOrReplaceTempView(\"bank2Monthly\")",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:16:52 PM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -327,17 +418,48 @@
       "jobName": "paragraph_1479158188584_551983994",
       "id": "20161114-211628_1466443087",
       "dateCreated": "Nov 14, 2016 9:16:28 AM",
-      "dateStarted": "Nov 14, 2016 10:11:12 AM",
-      "dateFinished": "Nov 14, 2016 10:11:15 AM",
+      "dateStarted": "Nov 20, 2016 3:16:52 PM",
+      "dateFinished": "Nov 20, 2016 3:16:54 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Sabadell Daily",
-      "text": "%sql\nselect Day, Total from bank2Daily where to_date(Day) \u003e \u00272016-06-31\u0027",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:05:24 AM",
+      "title": "Balance Bank2",
+      "text": "// this is a bit more tricky (note: pretty sure there are better ways to solve it!)\nval originalBank2BalanceDF \u003d bank2DF\n    .select($\"Date\", $\"Balance\").dropDuplicates(Array(\"Date\"))  // take just date and balance, if several balances for a day take last one only\n    .unionAll(yearDF)                                           // union with year of days without balance\n    .groupBy($\"Date\").agg(sum($\"Balance\").alias(\"Balance\"))     // group by day and sum balances\n    .sort(asc(\"Date\"))\n\n// now let\u0027s fill the gaps: it would be great to do this in Spark directly (however foldLeft in Spark is not the same as in Scala, and I need order preserved)\nval originalBank2Balance \u003d originalBank2BalanceDF.collect.map { case row \u003d\u003e Balance(row.getDate(0), row.getDouble(1)) } // with gaps\nval bank2Balance \u003d carryon(originalBank2Balance) // without gaps\n\nval bank2BalanceDF \u003d sc.parallelize(bank2Balance).toDF(\"Date\", \"Balance\")\nbank2BalanceDF.createOrReplaceTempView(\"bank2Balance\")\n",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:17:02 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479639225169_1163589124",
+      "id": "20161120-105345_1291274237",
+      "dateCreated": "Nov 20, 2016 10:53:45 AM",
+      "dateStarted": "Nov 20, 2016 3:17:02 PM",
+      "dateFinished": "Nov 20, 2016 3:17:09 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Bank2 Daily",
+      "text": "%sql\nselect Day, Total from bank2Daily",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:17:15 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -383,17 +505,16 @@
       "jobName": "paragraph_1479158869549_1654254011",
       "id": "20161114-212749_986081447",
       "dateCreated": "Nov 14, 2016 9:27:49 AM",
-      "dateStarted": "Nov 14, 2016 9:44:40 AM",
-      "dateFinished": "Nov 14, 2016 9:44:40 AM",
+      "dateStarted": "Nov 20, 2016 3:17:15 PM",
+      "dateFinished": "Nov 20, 2016 3:17:16 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Sabadell Monthly",
-      "text": "%sql\nselect Month, Total from bank2Monthly where Month \u003e 6",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:05:34 AM",
+      "title": "Bank2 Monthly",
+      "text": "%sql\nselect Month, Total from bank2Monthly",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:17:18 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -439,17 +560,16 @@
       "jobName": "paragraph_1479158913364_1042549233",
       "id": "20161114-212833_523812216",
       "dateCreated": "Nov 14, 2016 9:28:33 AM",
-      "dateStarted": "Nov 14, 2016 9:44:44 AM",
-      "dateFinished": "Nov 14, 2016 9:44:46 AM",
+      "dateStarted": "Nov 20, 2016 3:17:18 PM",
+      "dateFinished": "Nov 20, 2016 3:17:21 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Sabadell Balance",
-      "text": "%sql\nselect Date, Balance from bank2Balance where to_date(Date) \u003e \u00272016-06-31\u0027",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:05:43 AM",
+      "title": "Bank2 Balance",
+      "text": "%sql\nselect Date, Balance from bank2Balance",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:17:27 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -495,17 +615,16 @@
       "jobName": "paragraph_1479158910817_-1141670273",
       "id": "20161114-212830_904789753",
       "dateCreated": "Nov 14, 2016 9:28:30 AM",
-      "dateStarted": "Nov 14, 2016 10:11:22 AM",
-      "dateFinished": "Nov 14, 2016 10:11:22 AM",
+      "dateStarted": "Nov 20, 2016 3:17:27 PM",
+      "dateFinished": "Nov 20, 2016 3:17:27 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "title": "Join Bank1 and Sabadell (daily, monthly, balance)",
-      "text": "val bankDF \u003d bank1DF.unionAll(bank2DF)\nbankDF.registerTempTable(\"bank\")\n\nval bankDailyDF \u003d bankDF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbankDailyDF.registerTempTable(\"bankDaily\")\n\nval bankMonthlyDF \u003d bankDailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbankMonthlyDF.registerTempTable(\"bankMonthly\")\n\nval bankBalanceDF \u003d bank1BalanceDF.unionAll(bank2BalanceDF).groupBy($\"Date\").agg(sum($\"Balance\").alias(\"Balance\")).sort(asc(\"Date\"))\nbankBalanceDF.registerTempTable(\"bankBalance\")",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:05:14 AM",
+      "title": "Join Bank1 and Bank2 (daily, monthly, balance)",
+      "text": "val bankDF \u003d bank1DF.unionAll(bank2DF)\n//bankDF.createOrReplaceTempView(\"bank\")\n\nval bankDailyDF \u003d bankDF.select($\"Date\", $\"Amount\").groupBy($\"Date\".alias(\"Day\")).agg(sum($\"Amount\").alias(\"Total\")).sort(asc(\"Day\"))\nbankDailyDF.createOrReplaceTempView(\"bankDaily\")\n\nval bankMonthlyDF \u003d bankDailyDF.groupBy(month($\"Day\").alias(\"Month\")).agg(sum($\"Total\").alias(\"Total\")).sort(asc(\"Month\"))\nbankMonthlyDF.createOrReplaceTempView(\"bankMonthly\")\n\nval bankBalanceDF \u003d bank1BalanceDF.unionAll(bank2BalanceDF).groupBy($\"Date\").agg(sum($\"Balance\").alias(\"Balance\")).sort(asc(\"Date\"))\nbankBalanceDF.createOrReplaceTempView(\"bankBalance\")",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:17:34 PM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -528,17 +647,16 @@
       "jobName": "paragraph_1479159092022_1135890497",
       "id": "20161114-213132_1069945287",
       "dateCreated": "Nov 14, 2016 9:31:32 AM",
-      "dateStarted": "Nov 14, 2016 10:19:01 AM",
-      "dateFinished": "Nov 14, 2016 10:19:04 AM",
+      "dateStarted": "Nov 20, 2016 3:17:34 PM",
+      "dateFinished": "Nov 20, 2016 3:17:38 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Joined Daily",
-      "text": "%sql\nselect Day, Total from bankDaily where to_date(Day) \u003e \u00272016-06-31\u0027",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:05:58 AM",
+      "text": "%sql\nselect Day, Total from bankDaily",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:17:44 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -584,17 +702,16 @@
       "jobName": "paragraph_1479160249699_1164630649",
       "id": "20161114-215049_2112884745",
       "dateCreated": "Nov 14, 2016 9:50:49 AM",
-      "dateStarted": "Nov 14, 2016 9:53:09 AM",
-      "dateFinished": "Nov 14, 2016 9:53:11 AM",
+      "dateStarted": "Nov 20, 2016 3:17:44 PM",
+      "dateFinished": "Nov 20, 2016 3:17:47 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Joined Monthly",
-      "text": "%sql\nselect Month, Total from bankMonthly where Month \u003e 6",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:06:08 AM",
+      "text": "%sql\nselect Month, Total from bankMonthly\n",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:18:09 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -640,17 +757,16 @@
       "jobName": "paragraph_1479160297123_-1576259218",
       "id": "20161114-215137_718072930",
       "dateCreated": "Nov 14, 2016 9:51:37 AM",
-      "dateStarted": "Nov 14, 2016 9:53:29 AM",
-      "dateFinished": "Nov 14, 2016 9:53:34 AM",
+      "dateStarted": "Nov 20, 2016 3:18:09 PM",
+      "dateFinished": "Nov 20, 2016 3:18:16 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Joined Balance",
-      "text": "%sql\nselect Date, Balance from bankBalance where to_date(Date) \u003e \u00272016-06-31\u0027",
-      "user": "flopezlasanta",
-      "dateUpdated": "Nov 16, 2016 2:06:24 AM",
+      "text": "%sql\nselect Date, Balance from bankBalance",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 3:18:19 PM",
       "config": {
         "colWidth": 4.0,
         "graph": {
@@ -696,15 +812,15 @@
       "jobName": "paragraph_1479160369481_-1329560197",
       "id": "20161114-215249_1529720944",
       "dateCreated": "Nov 14, 2016 9:52:49 AM",
-      "dateStarted": "Nov 14, 2016 10:19:21 AM",
-      "dateFinished": "Nov 14, 2016 10:19:24 AM",
+      "dateStarted": "Nov 20, 2016 3:18:19 PM",
+      "dateFinished": "Nov 20, 2016 3:18:20 PM",
       "status": "FINISHED",
-      "errorMessage": "",
       "progressUpdateIntervalMs": 500
     },
     {
-      "text": "// balance should fill gaps with previous value\n// daily should include days with zero movements",
-      "dateUpdated": "Nov 16, 2016 2:06:57 AM",
+      "text": "",
+      "user": "admin",
+      "dateUpdated": "Nov 20, 2016 11:48:28 AM",
       "config": {
         "colWidth": 12.0,
         "graph": {
@@ -723,10 +839,12 @@
         "params": {},
         "forms": {}
       },
-      "jobName": "paragraph_1479160435557_-2092224462",
-      "id": "20161114-215355_1634621248",
-      "dateCreated": "Nov 14, 2016 9:53:55 AM",
-      "status": "READY",
+      "jobName": "paragraph_1479580433155_-919970979",
+      "id": "20161119-183353_1163932089",
+      "dateCreated": "Nov 19, 2016 6:33:53 AM",
+      "dateStarted": "Nov 20, 2016 11:49:51 AM",
+      "dateFinished": "Nov 20, 2016 11:49:54 AM",
+      "status": "FINISHED",
       "errorMessage": "",
       "progressUpdateIntervalMs": 500
     }
