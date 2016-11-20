@@ -23,6 +23,12 @@ Additional information about the notebooks here available:
 | Account Analysis | Spark | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C17HCPG9/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvOTkwMDU5MzNjYWZlNGVlMWJmZjk3MmYxYjNlMGVkMzEvbm90ZS5qc29u) |
 | Twitter Streaming | Twitter / Spark Streaming / Angular / Leaflet | [json](https://github.com/flopezlasanta/zeppelin-notebooks/blob/master/2C3DZJWAT/note.json) | [view](https://www.zeppelinhub.com/viewer/notebooks/bm90ZTovL2Zsb3Blemxhc2FudGEvWmVwcGVsaW4tTG9jYWwvNzk5MzRjM2Q5NDFhNDhkYzlhMDQ2NWM2ZjlhNzIzY2Yvbm90ZS5qc29u) |
 
+## Libraries
+
+Extra libraries added to the Spark interpreter for the previously listed notebooks:
+- [nscala-time](https://github.com/nscala-time/nscala-time) (Scala wrapper for Joda Time)
+- [spark-streaming-twitter](http://bahir.apache.org/docs/spark/current/spark-streaming-twitter/) (library for reading social data from Twitter using Spark Streaming)
+
 ## Getting Started with Zeppelin
 
 ### Install Zeppelin (OS X)
