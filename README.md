@@ -26,8 +26,8 @@ Additional information about the notebooks here available:
 ## Libraries
 
 Extra libraries added to the Spark interpreter for the previously listed notebooks:
-- [nscala-time](https://github.com/nscala-time/nscala-time) (Scala wrapper for Joda Time)
-- [spark-streaming-twitter](http://bahir.apache.org/docs/spark/current/spark-streaming-twitter/) (library for reading social data from Twitter using Spark Streaming)
+- [nscala-time](https://github.com/nscala-time/nscala-time): Scala wrapper for Joda Time
+- [spark-streaming-twitter](http://bahir.apache.org/docs/spark/current/spark-streaming-twitter/): library for reading social data from Twitter using Spark Streaming
 
 ## Getting Started with Zeppelin
 
