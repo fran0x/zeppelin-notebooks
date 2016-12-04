@@ -60,3 +60,6 @@ For simplicity add aliases to your bash profile, for instance the following:
 - Add API token and user key in Zeppelin shell script 
 - Launch Zeppelin daemon
 
+## Other
+
+- See also [HortonWorks Gallery](https://github.com/hortonworks-gallery/zeppelin-notebooks)
