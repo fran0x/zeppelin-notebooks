@@ -1,0 +1,87 @@
+{
+  "paragraphs": [
+    {
+      "text": "// read text file, remove header, and replace tabs by commas\nval rawRDD \u003d sc.textFile(fastaTXT)\nval dataRDD \u003d raw.filter(!_.contains(\"sample\")).map(line \u003d\u003e line.split(\u0027\\t\u0027))\n\n// lines will be represented by means of a case class (Line) that provides a custom implementation for sorting\ncase class Line(seq: Double, maxL: Double, minL: Double, gc: Double, meanQ: Double, minQL: Double, minQ10: Double, weightedQ: Double, meanI: Double, weightedL: Double) extends Ordered[Line] {\n    def compare(other: Line) \u003d {\n        var points, pointsOther \u003d 0\n        \n        // give points to one or another depending on attribute comparison criteria\n        if (this.maxL \u003e\u003d other.maxL) points +\u003d 1 else pointsOther +\u003d 1\n        if (this.minL \u003e\u003d other.minL) points +\u003d 1 else pointsOther +\u003d 1\n        if (this.gc \u003e\u003d other.gc) points +\u003d 1 else pointsOther +\u003d 1   \n        \n        points compareTo pointsOther\n    }        \n}\n\n// function to normalize keys by removing suffix when applicable\nval suffix \u003d \"(_R)?(_\\\\d)$\".r\ndef norm(value: String) \u003d suffix replaceAllIn(value, \"\")\n\n// implicit conversion from string to double\nimplicit def string2double(value: String) \u003d value.toDouble\n\n// for each line there is an array of strings: each will be converted into a tuple (key, attributes)\n//  key will be sample normalized (see previous function)\n//  sample attributes will be converted from string to doubles (for operating later) and stored as a case class (Line)\nval lineRDD \u003d dataRDD.map {\n    case Array(s, seq, maxL, minL, gc, meanQ, minQL, minQ10, weightedQ, meanI, weightedL) \u003d\u003e \n        (norm(s), Line(seq, maxL, minL, gc, meanQ, minQL, minQ10, weightedQ, meanI, weightedL))\n}\n\n// group tuples by key; that will return for each key a list of case classes (Line); then sort that list and take the first element only (better ranking) \nval resultRDD \u003d lineRDD.groupByKey().map{ case (k, v) \u003d\u003e (k, v.toList.sorted.head) }\n\n// create view to analyse results\nresultRDD.toDF.createOrReplaceTempView(\"result\")",
+      "user": "admin",
+      "dateUpdated": "Dec 4, 2016 9:57:40 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1480183817066_33189229",
+      "id": "20161126-191017_1061281560",
+      "dateCreated": "Nov 26, 2016 7:10:17 AM",
+      "dateStarted": "Nov 27, 2016 11:27:18 AM",
+      "dateFinished": "Nov 27, 2016 11:27:20 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "",
+      "dateUpdated": "Nov 27, 2016 11:29:54 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1480242584068_1621117991",
+      "id": "20161127-112944_428380033",
+      "dateCreated": "Nov 27, 2016 11:29:44 AM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "FASTA KPI Evaluation",
+  "id": "2C28B8KD4",
+  "angularObjects": {
+    "2C3UTV28R:shared_process": [],
+    "2C21E796A:shared_process": [],
+    "2BZT2ZSCQ:shared_process": [],
+    "2C1T9MXGS:shared_process": [],
+    "2C2YSHTSS:shared_process": [],
+    "2BZEH22C8:shared_process": [],
+    "2BZ4XB5SH:shared_process": [],
+    "2C361FCMD:shared_process": [],
+    "2C1KZ7K63:shared_process": [],
+    "2C2JF5HA6:shared_process": [],
+    "2C1M8N29X:shared_process": [],
+    "2C16875ST:shared_process": [],
+    "2C1VYQHSF:shared_process": [],
+    "2C19E3KUX:shared_process": [],
+    "2C1EM8G81:shared_process": [],
+    "2C21NE7P8:shared_process": [],
+    "2C269K9N2:shared_process": [],
+    "2BZNT78YS:shared_process": []
+  },
+  "config": {
+    "looknfeel": "default"
+  },
+  "info": {}
+}
