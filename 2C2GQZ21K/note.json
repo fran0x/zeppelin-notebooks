@@ -1,0 +1,125 @@
+{
+  "paragraphs": [
+    {
+      "title": "Define function for LDAP authentication",
+      "text": "%python\nfrom ldap3 import Server, Connection, NTLM, ALL\n\nldap_server \u003d \u0027YOUR_SERVER\u0027\nldap_domain \u003d \u0027YOUR_DOMAIN\u0027\nldap_base_dn \u003d \u0027YOUR_BASE_DN\u0027\n\ndef check_credentials(username, password):\n\n    ldap_username \u003d ldap_domain + \u0027\\\\\u0027 + username;\n    \n    server \u003d Server(ldap_server, get_info\u003dALL)\n    conn \u003d Connection(server, authentication\u003dNTLM, user\u003dldap_username, password\u003dpassword, raise_exceptions\u003dFalse)\n    \n    try:\n        if not conn.bind():\n            return False, None\n            \n        base_dn \u003d ldap_base_dn\n        user_filter \u003d \u0027(sAMAccountName\u003d{0})\u0027.format(username)\n        \n        conn.search(base_dn, user_filter, attributes\u003d[\u0027memberOf\u0027, \u0027displayName\u0027, \u0027mail\u0027])\n        \n        user_email \u003d conn.response[0][\u0027attributes\u0027][\u0027mail\u0027]\n        user_display_name \u003d conn.response[0][\u0027attributes\u0027][\u0027displayName\u0027]\n        user_info \u003d { \u0027username\u0027: username, \u0027email\u0027: user_email, \u0027displayName\u0027: user_display_name }\n        \n        conn.unbind()\n        \n        return True, user_info\n    except LDAPException as e:\n        return False, None",
+      "user": "admin",
+      "dateUpdated": "Dec 4, 2016 9:50:51 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479387499372_2003505355",
+      "id": "20161117-125819_821194269",
+      "dateCreated": "Nov 17, 2016 12:58:19 PM",
+      "dateStarted": "Nov 17, 2016 1:40:36 AM",
+      "dateFinished": "Nov 17, 2016 1:40:36 AM",
+      "status": "FINISHED",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Test user authentication",
+      "text": "%python\nusername \u003d \u0027YOUR_USERNAME\u0027\npassword \u003d \u0027YOUR_PASSWORD\u0027\n\nsuccess, user_info \u003d check_credentials(username, password)\n\nprint \u0027authorized: {}\u0027.format(success)\nif success:\n    print \u0027user name: {}\u0027.format(user_info[\u0027username\u0027])\n    print \u0027user email: {}\u0027.format(user_info[\u0027email\u0027])\n    print \u0027user display name: {}\u0027.format(user_info[\u0027displayName\u0027])",
+      "user": "admin",
+      "dateUpdated": "Dec 4, 2016 9:44:43 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479388060732_-1091429598",
+      "id": "20161117-130740_1926769480",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Nov 17, 2016 1:07:40 AM",
+      "dateStarted": "Nov 17, 2016 1:17:05 AM",
+      "dateFinished": "Nov 17, 2016 1:17:06 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "",
+      "dateUpdated": "Nov 17, 2016 1:18:21 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1479388678046_670255705",
+      "id": "20161117-131758_2033253966",
+      "dateCreated": "Nov 17, 2016 1:17:58 AM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "LDAP",
+  "id": "2C2GQZ21K",
+  "angularObjects": {
+    "2C3UTV28R:shared_process": [],
+    "2C21E796A:shared_process": [],
+    "2BZT2ZSCQ:shared_process": [],
+    "2C1T9MXGS:shared_process": [],
+    "2C2YSHTSS:shared_process": [],
+    "2BZEH22C8:shared_process": [],
+    "2BZ4XB5SH:shared_process": [],
+    "2C361FCMD:shared_process": [],
+    "2C1KZ7K63:shared_process": [],
+    "2C2JF5HA6:shared_process": [],
+    "2C1M8N29X:shared_process": [],
+    "2C16875ST:shared_process": [],
+    "2C1VYQHSF:shared_process": [],
+    "2C19E3KUX:shared_process": [],
+    "2C1EM8G81:shared_process": [],
+    "2C21NE7P8:shared_process": [],
+    "2BZNT78YS:shared_process": [],
+    "2C269K9N2:shared_process": []
+  },
+  "config": {},
+  "info": {}
+}
